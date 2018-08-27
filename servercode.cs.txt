@@ -1,0 +1,76 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Net;
+using System.Net.Sockets;
+using System.IO;
+
+namespace ServerClient
+{
+    class Program
+    {
+        static byte[] Buffer { get; set; }
+        static Socket sck;
+        static Socket toDarwin;
+
+
+        public static void connectDarwin(string info, Socket temp, IPEndPoint localEndPointD)
+        {
+           
+            byte[] data;
+            data = Encoding.ASCII.GetBytes(info);
+            temp.Send(data);
+
+        }
+
+        static void Main(string[] args)
+        {
+            sck = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            sck.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1520));
+            sck.Listen(100);
+
+            toDarwin = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Parse("192.168.123.102"), 1516);
+   
+            
+            try
+            {
+                Console.Write("Attempt connection");
+                toDarwin.Connect(localEndPoint);
+                
+            }
+            catch
+            {
+                Console.Write("UNable to connect");
+            }
+            
+
+
+
+            Socket accepted = sck.Accept();
+            Console.Write("connection success");
+
+            while (true)
+            {
+                Buffer = new byte[accepted.SendBufferSize];
+                int bytesRead = accepted.Receive(Buffer);
+                byte[] formatted = new byte[bytesRead];
+                for (int i = 0; i < bytesRead; i++)
+                {
+                    //Console.Write(Buffer[i] + Environment.NewLine);
+                    formatted[i] = Buffer[i];
+
+                }
+                
+                string strData = Encoding.ASCII.GetString(formatted);
+                Console.Write(strData + Environment.NewLine);
+                connectDarwin(strData, toDarwin, localEndPoint);
+            }
+
+            sck.Close();
+            accepted.Close();
+        }
+    }
+}
