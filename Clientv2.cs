@@ -84,7 +84,7 @@ public class Clientv2 : MonoBehaviour {
 		sock.Send(data);
 		
 		
-		
+		//For testing purposes
 		//Console.Write("Dat Send!\r\n");
 		//Console.Write("Press any key to continue...");
 		//Console.Read();
